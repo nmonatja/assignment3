@@ -4,6 +4,10 @@
  * and open the template in the editor.
  */
 
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.Timer;
+
 /**
  *
  * @author Ivan
@@ -11,11 +15,17 @@
 public class SprinklerInput extends javax.swing.JFrame {
     String sprinklerAction = null;
     Boolean Done = false;
+
     /**
      * Creates new form SprinklerInput
      */
     public SprinklerInput() {
         initComponents();
+        
+        this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        
+        timer = new Timer(1000, new TimerListener());
+        timer.start();
     }
 
     /**
@@ -30,6 +40,9 @@ public class SprinklerInput extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -49,6 +62,12 @@ public class SprinklerInput extends javax.swing.JFrame {
 
         jLabel1.setText("Please make a selection");
 
+        jLabel2.setText("Sprinkler will turn on automatically in");
+
+        jTextField1.setText("10");
+
+        jLabel3.setText("secs.");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -59,8 +78,14 @@ public class SprinklerInput extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
                         .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(208, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)))
+                .addContainerGap(83, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -71,7 +96,12 @@ public class SprinklerInput extends javax.swing.JFrame {
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(67, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         pack();
@@ -126,10 +156,33 @@ public class SprinklerInput extends javax.swing.JFrame {
             }
         });
     }
+    
+    class TimerListener implements ActionListener{
+        int remainingSeconds = 10;
+
+        @Override
+        public void actionPerformed(ActionEvent evt){
+            remainingSeconds--;
+            jTextField1.setText(Integer.toString(remainingSeconds));
+            if(remainingSeconds <= 0){
+                timer.stop();
+                
+                sprinklerAction = "activate";
+                Done = true;
+                SprinklerInput.this.dispose(); //calls dispose on the outer or parent class
+            }
+        }
+
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
+    private javax.swing.Timer timer;
 }
