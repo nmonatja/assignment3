@@ -6,14 +6,11 @@
 * Versions:
 *	1.0 February 2009 - Initial rewrite of original assignment 3 (ajl).
 *
-* Description: This class is the console for the museum environmental control system. This process consists of two
-* threads. The ECSMonitor object is a thread that is started that is responsible for the monitoring and control of
-* the museum environmental systems. The main thread provides a text interface for the user to change the temperature
-* and humidity ranges, as well as shut down the system.
+* Description: This class is the console for the museum security control system. This process consists of two
+* threads. The SecurityMonitor object is a thread that is started that is responsible for the monitoring and control of
+* the museum security systems. The main thread provides a text interface for the user to arm/disarm the system, 
+* as well as shut down the system.
 *
-* Parameters: None
-*
-* Internal Methods: None
 *
 ******************************************************************************************************************/
 import TermioPackage.*;
@@ -29,6 +26,7 @@ public class SecurityConsole
 		Message Msg = null;					// Message object
 		boolean Error = false;				// Error flag
 		SecurityMonitor Monitor = null;			// The security monitor
+                
 		
 
 		/////////////////////////////////////////////////////////////////////////////////
@@ -38,13 +36,9 @@ public class SecurityConsole
  		if ( args.length != 0 )
  		{
 			// message manager is not on the local system
-
 			Monitor = new SecurityMonitor( args[0] );
-
 		} else {
-
 			Monitor = new SecurityMonitor();
-
 		} // if
 
 

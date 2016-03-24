@@ -1,32 +1,23 @@
 /******************************************************************************************************************
-* File:SecurityController.java
+* File:FireAlarmController.java
 * Course: 17655
 * Project: Assignment A3
 * Copyright: Copyright (c) 2009 Carnegie Mellon University
 * Versions:
-*	1.0 March 2009 - Initial rewrite of original assignment 3 (ajl).
+*	1.0 March 2009 - Initial rewrite of original assignment 6 (ajl).
 *
 * Description:
 *
-* This class simulates a device that controls security. It polls the message manager for message ids = 7
-* and reacts to them by confirming a msg is received. 
+* This class simulates a device that controls fire alarm. It polls the message manager for message ids = 6
+* and reacts to them by turning the sprinkler on if the user doesn't respond within 10 secs. 
 *
-* The state (on/off) is graphically displayed on the terminal in the indicator. Command messages are displayed in
-* the message window. Once a valid command is received a confirmation message is sent with the id of -7 and the command in
-* the command string.
-*
-* Parameters: IP address of the message manager (on command line). If blank, it is assumed that the message manager is
-* on the local machine.
-*
-* Internal Methods:
-*	static private void ConfirmMessage(MessageManagerInterface ei, String m )
 *
 ******************************************************************************************************************/
 import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class SecurityController
+class FireAlarmController
 {
 	public static void main(String args[])
 	{
@@ -35,10 +26,9 @@ class SecurityController
 		MessageQueue eq = null;				// Message Queue
 		int MsgId = 0;						// User specified message ID
 		MessageManagerInterface em = null;	// Interface object to the message manager
-		boolean ArmedState = false;		// Armed state: false == off, true == on
 		int	Delay = 2500;					// The loop delay (2.5 seconds)
 		boolean Done = false;				// Loop termination flag
-
+                boolean activateSprinkler = false;
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the IP address of the message manager
 		/////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +84,7 @@ class SecurityController
 		{
 			System.out.println("Registered with the message manager." );
 
-			/* Now we create the security control status and message panel
+			/* Now we create the fire alarm panel
 			** We put this panel about 1/3 the way down the terminal, aligned to the left
 			** of the terminal. The status indicators are placed directly under this panel
 			*/
@@ -104,11 +94,11 @@ class SecurityController
 			float WinPosY = 0.3f; 	//This is the Y position of the message window in terms
 								 	//of a percentage of the screen height
 
-			MessageWindow mw = new MessageWindow("Security Controller Status Console", WinPosX, WinPosY);
+			MessageWindow mw = new MessageWindow("Fire Alarm Controller Status Console", WinPosX, WinPosY);
 
 			// Put the status indicators under the panel...
 
-			Indicator si = new Indicator ("Security OFF", mw.GetX(), mw.GetY()+mw.Height());
+			Indicator si = new Indicator ("Fire Alarm OFF", mw.GetX(), mw.GetY()+mw.Height());
 			
 			mw.WriteMessage("Registered with the message manager." );
 
@@ -145,8 +135,8 @@ class SecurityController
 				} // catch
 
 				// If there are messages in the queue, we read through them.
-				// We are looking for MessageIDs = 7, this is a request to turn the
-				// security on/off. Note that we get all the messages
+				// We are looking for MessageIDs = 6, this is a request to turn the
+				// sprinkler on if fire is detected. Note that we get all the messages
 				// at once... there is a 2.5 second delay between samples,.. so
 				// the assumption is that there should only be a message at most.
 				// If there are more, it is the last message that will effect the
@@ -158,29 +148,10 @@ class SecurityController
 				{
 					Msg = eq.GetMessage();
 
-					if ( Msg.GetMessageId() == 7 )
+					if ( Msg.GetMessageId() == 6 )//NEEDS WORK HERE****************
 					{
-						if (Msg.GetMessage().equalsIgnoreCase("A1")) // security armed
-						{
-							ArmedState = true;
-							mw.WriteMessage("Received security armed message" );
+						
 
-							// Confirm that the message was recieved and acted on
-
-							ConfirmMessage( em, "A1" );
-
-						} // if
-
-						if (Msg.GetMessage().equalsIgnoreCase("A0")) // disarm security
-						{
-							ArmedState = false;
-							mw.WriteMessage("Received disarm security  message" );
-
-							// Confirm that the message was recieved and acted on
-
-							ConfirmMessage( em, "A0" );
-
-						} // 
 
 					} // if
 
@@ -215,21 +186,6 @@ class SecurityController
 
 				} // for
 
-				// Update the lamp status
-
-				if (ArmedState)
-				{
-					// Set to green, heater is on
-
-					si.SetLampColorAndMessage("SECURITY ON", 1);
-
-				} else {
-
-					// Set to black, heater is off
-					si.SetLampColorAndMessage("SECURITY OFF", 0);
-
-				} // if
-
 
 				try
 				{
@@ -256,7 +212,7 @@ class SecurityController
 	/***************************************************************************
 	* CONCRETE METHOD:: ConfirmMessage
 	* Purpose: This method posts the specified message to the specified message
-	* manager. This method assumes an message ID of -7 which indicates a confirma-
+	* manager. This method assumes an message ID of -8 which indicates a confirma-
 	* tion of a command.
 	*
 	* Arguments: MessageManagerInterface ei - this is the messagemanger interface
@@ -270,11 +226,11 @@ class SecurityController
 	*
 	***************************************************************************/
 
-	static private void ConfirmMessage(MessageManagerInterface ei, String m )
+	static private void FireDetected(MessageManagerInterface ei, String m )
 	{
 		// Here we create the message.
 
-		Message msg = new Message( (int) -7, m );
+		Message msg = new Message( (int) -8, m );
 
 		// Here we send the message to the message manager.
 
@@ -292,4 +248,4 @@ class SecurityController
 
 	} // PostMessage
 
-} // SecurityController
+} // FireAlarmController

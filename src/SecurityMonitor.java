@@ -8,9 +8,7 @@
 *
 * Description:
 *
-* This class monitors the environmental control systems that control museum temperature and humidity. In addition to
-* monitoring the temperature and humidity, the SecurityMonitor also allows a user to set the humidity and temperature
-* ranges to be maintained. If temperatures exceed those limits over/under alarm indicators are triggered.
+* This class monitors the security control systems. 
 *
 * Parameters: IP address of the message manager (on command line). If blank, it is assumed that the message manager is
 * on the local machine.
@@ -28,8 +26,12 @@ class SecurityMonitor extends Thread
 	boolean Registered = true;					// Signifies that this class is registered with an message manager.
 	MessageWindow mw = null;					// This is the message window
 	Indicator si;								// Security indicator
+        Indicator si2;								// Fire indicator
         boolean systemArmed = false;
+        boolean sprinklerUIDisplayed = false;
         
+
+            
 	public SecurityMonitor()
 	{
 		// message manager is on the local system
@@ -80,13 +82,12 @@ class SecurityMonitor extends Thread
 		Message Msg = null;				// Message object
 		MessageQueue eq = null;			// Message Queue
 		int MsgId = 0;					// User specified message ID
-		float CurrentTemperature = 0;	// Current temperature as reported by the temperature sensor
-		float CurrentHumidity= 0;		// Current relative humidity as reported by the humidity sensor
 		int	Delay = 1000;				// The loop delay (1 second)
 		boolean Done = false;			// Loop termination flag
 		boolean ON = true;				// Used to turn on heaters, chillers, humidifiers, and dehumidifiers
 		boolean OFF = false;			// Used to turn off heaters, chillers, humidifiers, and dehumidifiers
-                String securityAlert = null;
+                String sysAlert = null;
+                String fireAlert = null;
 
 		if (em != null)
 		{
@@ -98,7 +99,7 @@ class SecurityMonitor extends Thread
 
 			mw = new MessageWindow("Security Monitoring Console", 0, 0);
 			si = new Indicator ("SECURITY UNK", mw.GetX()+ mw.Width(), 0);
-
+                        si2 = new Indicator ("FIRE ALERT UNK", si.GetX()+ 2*si.Width(), 0);
 
 			mw.WriteMessage( "Registered with the message manager." );
 
@@ -136,9 +137,8 @@ class SecurityMonitor extends Thread
 				} // catch
 
 				// If there are messages in the queue, we read through them.
-				// We are looking for MessageIDs = 1 or 2. Message IDs of 1 are temperature
-				// readings from the temperature sensor; message IDs of 2 are humidity sensor
-				// readings. Note that we get all the messages at once... there is a 1
+				// We are looking for MessageIDs = 3 (security event triggered) or 6 (fire event). 
+                                // Note that we get all the messages at once... there is a 1
 				// second delay between samples,.. so the assumption is that there should
 				// only be a message at most. If there are more, it is the last message
 				// that will effect the status of the temperature and humidity controllers
@@ -154,18 +154,37 @@ class SecurityMonitor extends Thread
 					{
 						try
 						{
-							securityAlert = Msg.GetMessage();
+							sysAlert = Msg.GetMessage();
 
 						} // try
 
 						catch( Exception e )
 						{
-							mw.WriteMessage("Error reading temperature: " + e);
+							mw.WriteMessage("Error reading security alert: " + e);
 
 						} // catch
 
 					} // if
 
+                                        if ( Msg.GetMessageId() == 6) // Fire reading
+					{
+						try
+						{
+							fireAlert = Msg.GetMessage();
+                                                        if (!(fireAlert == null)) {//there is fire alarm
+                                                            DisplaySprinklerUI(); //display sprinkler UI
+                                                            
+                                                        }
+                                                       
+						} // try
+
+						catch( Exception e )
+						{
+							mw.WriteMessage("Error reading fire alert: " + e);
+
+						} // catch
+
+					} // if
 
 					// If the message ID == 99 then this is a signal that the simulation
 					// is to end. At this point, the loop termination flag is set to
@@ -193,25 +212,34 @@ class SecurityMonitor extends Thread
 						// user to exit so they can see the last message posted.
 
 						si.dispose();
+                                                si2.dispose();
 
 					} // if
 
 				} // for
 
-				mw.WriteMessage("Security event:: " + securityAlert);
-
+				mw.WriteMessage("Security event:: " + sysAlert);
+                                mw.WriteMessage("Fire alert event:: " + fireAlert);
 				// Check temperature and effect control as necessary
 
-				if (!(securityAlert == null) && systemArmed) // something triggered security alert
+				if (!(sysAlert == null) && systemArmed) // something triggered security alert
 				{
 					si.SetLampColorAndMessage("ALERT", 3);
 
-				} else {
+				} 
+                                else {
 						si.SetLampColorAndMessage("NO ALERT", 1); // no security alert
 
 				} // if
 
+                                if (!(fireAlert == null)) {//there is fire alarm
+                                    si2.SetLampColorAndMessage("FIRE ALARM", 3);
+                                    
+                                } 
+                                else {
+						si2.SetLampColorAndMessage("NO FIRE", 1); // no security alert
 
+				} // if
 				// This delay slows down the sample rate to Delay milliseconds
 
 				try
@@ -342,4 +370,14 @@ class SecurityMonitor extends Thread
 
 	} // Heater
 
+        //pop up a sprinkler UI for the user
+        public void DisplaySprinklerUI()
+        {     
+                SprinklerUI SprinklerInterface = new SprinklerUI(); //for prompting user to take sprinkler action
+                if (SprinklerInterface.IsRegistered() ){
+                    SprinklerInterface.start(); // Here we start sprinkler action thread
+                }			    
+        }
+        
+        
 } // SecurityMonitor

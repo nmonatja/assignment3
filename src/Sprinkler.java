@@ -1,32 +1,9 @@
-/******************************************************************************************************************
-* File:SecurityController.java
-* Course: 17655
-* Project: Assignment A3
-* Copyright: Copyright (c) 2009 Carnegie Mellon University
-* Versions:
-*	1.0 March 2009 - Initial rewrite of original assignment 3 (ajl).
-*
-* Description:
-*
-* This class simulates a device that controls security. It polls the message manager for message ids = 7
-* and reacts to them by confirming a msg is received. 
-*
-* The state (on/off) is graphically displayed on the terminal in the indicator. Command messages are displayed in
-* the message window. Once a valid command is received a confirmation message is sent with the id of -7 and the command in
-* the command string.
-*
-* Parameters: IP address of the message manager (on command line). If blank, it is assumed that the message manager is
-* on the local machine.
-*
-* Internal Methods:
-*	static private void ConfirmMessage(MessageManagerInterface ei, String m )
-*
-******************************************************************************************************************/
+
 import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class SecurityController
+class Sprinkler
 {
 	public static void main(String args[])
 	{
@@ -35,9 +12,9 @@ class SecurityController
 		MessageQueue eq = null;				// Message Queue
 		int MsgId = 0;						// User specified message ID
 		MessageManagerInterface em = null;	// Interface object to the message manager
-		boolean ArmedState = false;		// Armed state: false == off, true == on
 		int	Delay = 2500;					// The loop delay (2.5 seconds)
 		boolean Done = false;				// Loop termination flag
+                boolean sprinklerState = false;
 
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the IP address of the message manager
@@ -87,29 +64,29 @@ class SecurityController
 
 		} // if
 
-		// Here we check to see if registration worked. If ef is null then the
+		// Here we check to see if registration worked. If em is null then the
 		// message manager interface was not properly created.
 
 		if (em != null)
 		{
 			System.out.println("Registered with the message manager." );
 
-			/* Now we create the security control status and message panel
-			** We put this panel about 1/3 the way down the terminal, aligned to the left
+			/* Now we create the sprinkler message panel
+			** We put this panel about 2/3s the way down the terminal, aligned to the left
 			** of the terminal. The status indicators are placed directly under this panel
 			*/
 
 			float WinPosX = 0.0f; 	//This is the X position of the message window in terms
+									//of a percentage of the screen height
+			float WinPosY = 0.60f;	//This is the Y position of the message window in terms
 								 	//of a percentage of the screen height
-			float WinPosY = 0.3f; 	//This is the Y position of the message window in terms
-								 	//of a percentage of the screen height
 
-			MessageWindow mw = new MessageWindow("Security Controller Status Console", WinPosX, WinPosY);
+			MessageWindow mw = new MessageWindow("Sprinkler Status", WinPosX, WinPosY);
 
-			// Put the status indicators under the panel...
+			// Now we put the indicators directly under the humitity status and control panel
 
-			Indicator si = new Indicator ("Security OFF", mw.GetX(), mw.GetY()+mw.Height());
-			
+			Indicator hi = new Indicator ("Sprinkler OFF", mw.GetX(), mw.GetY()+mw.Height());
+
 			mw.WriteMessage("Registered with the message manager." );
 
 	    	try
@@ -131,7 +108,6 @@ class SecurityController
 
 			while ( !Done )
 			{
-
 				try
 				{
 					eq = em.GetMessageQueue();
@@ -145,12 +121,12 @@ class SecurityController
 				} // catch
 
 				// If there are messages in the queue, we read through them.
-				// We are looking for MessageIDs = 7, this is a request to turn the
-				// security on/off. Note that we get all the messages
+				// We are looking for MessageIDs = 4, this is a request to turn the
+				// humidifier or dehumidifier on/off. Note that we get all the messages
 				// at once... there is a 2.5 second delay between samples,.. so
 				// the assumption is that there should only be a message at most.
 				// If there are more, it is the last message that will effect the
-				// output of the security as it would in reality.
+				// output of the humidity as it would in reality.
 
 				int qlen = eq.GetSize();
 
@@ -158,29 +134,27 @@ class SecurityController
 				{
 					Msg = eq.GetMessage();
 
-					if ( Msg.GetMessageId() == 7 )
+					if ( Msg.GetMessageId() == -11 )
 					{
-						if (Msg.GetMessage().equalsIgnoreCase("A1")) // security armed
+						if (Msg.GetMessage().equalsIgnoreCase("S1")) // sprinkler on
 						{
-							ArmedState = true;
-							mw.WriteMessage("Received security armed message" );
-
+							mw.WriteMessage("Received turn sprinkler on message" );
+                                                        hi.SetLampColorAndMessage("SPRINKLER ON", 1);
 							// Confirm that the message was recieved and acted on
 
-							ConfirmMessage( em, "A1" );
+							ConfirmMessage( em, "S1" );
 
 						} // if
 
-						if (Msg.GetMessage().equalsIgnoreCase("A0")) // disarm security
+						if (Msg.GetMessage().equalsIgnoreCase("S0")) // cancel sprinler
 						{
-							ArmedState = false;
-							mw.WriteMessage("Received disarm security  message" );
-
+							mw.WriteMessage("Received cancel sprinkler message" );
+                                                        hi.SetLampColorAndMessage("SPRINKLER CANCEL", 1);
 							// Confirm that the message was recieved and acted on
 
-							ConfirmMessage( em, "A0" );
+							ConfirmMessage( em, "S0" );
 
-						} // 
+						} //
 
 					} // if
 
@@ -209,26 +183,12 @@ class SecurityController
 						// Get rid of the indicators. The message panel is left for the
 						// user to exit so they can see the last message posted.
 
-						si.dispose();
+						hi.dispose();
 
 					} // if
 
 				} // for
 
-				// Update the lamp status
-
-				if (ArmedState)
-				{
-					// Set to green, heater is on
-
-					si.SetLampColorAndMessage("SECURITY ON", 1);
-
-				} else {
-
-					// Set to black, heater is off
-					si.SetLampColorAndMessage("SECURITY OFF", 0);
-
-				} // if
 
 
 				try
@@ -256,7 +216,7 @@ class SecurityController
 	/***************************************************************************
 	* CONCRETE METHOD:: ConfirmMessage
 	* Purpose: This method posts the specified message to the specified message
-	* manager. This method assumes an message ID of -7 which indicates a confirma-
+	* manager. This method assumes an message ID of -4 which indicates a confirma-
 	* tion of a command.
 	*
 	* Arguments: MessageManagerInterface ei - this is the messagemanger interface
@@ -274,7 +234,7 @@ class SecurityController
 	{
 		// Here we create the message.
 
-		Message msg = new Message( (int) -7, m );
+		Message msg = new Message( (int) -12, m );
 
 		// Here we send the message to the message manager.
 
@@ -292,4 +252,4 @@ class SecurityController
 
 	} // PostMessage
 
-} // SecurityController
+} // Sprinklers

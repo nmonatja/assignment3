@@ -1,5 +1,5 @@
 /******************************************************************************************************************
-* File:SecurityController.java
+* File:SprinklerController.java
 * Course: 17655
 * Project: Assignment A3
 * Copyright: Copyright (c) 2009 Carnegie Mellon University
@@ -8,12 +8,16 @@
 *
 * Description:
 *
-* This class simulates a device that controls security. It polls the message manager for message ids = 7
-* and reacts to them by confirming a msg is received. 
+* This class simulates a device that controls sprinkler. It polls the message manager for message ids = 11
+* and reacts to them by turning on or canceling the sprinkler. The following command are valid strings for con
+* trolling the heater and chiller:
+*
+*	S1 = sprinkler on
+*	S0 = cancel sprinkler
+
 *
 * The state (on/off) is graphically displayed on the terminal in the indicator. Command messages are displayed in
-* the message window. Once a valid command is received a confirmation message is sent with the id of -7 and the command in
-* the command string.
+* the message window. 
 *
 * Parameters: IP address of the message manager (on command line). If blank, it is assumed that the message manager is
 * on the local machine.
@@ -26,7 +30,7 @@ import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class SecurityController
+class SprinklerController
 {
 	public static void main(String args[])
 	{
@@ -35,7 +39,6 @@ class SecurityController
 		MessageQueue eq = null;				// Message Queue
 		int MsgId = 0;						// User specified message ID
 		MessageManagerInterface em = null;	// Interface object to the message manager
-		boolean ArmedState = false;		// Armed state: false == off, true == on
 		int	Delay = 2500;					// The loop delay (2.5 seconds)
 		boolean Done = false;				// Loop termination flag
 
@@ -104,11 +107,11 @@ class SecurityController
 			float WinPosY = 0.3f; 	//This is the Y position of the message window in terms
 								 	//of a percentage of the screen height
 
-			MessageWindow mw = new MessageWindow("Security Controller Status Console", WinPosX, WinPosY);
+			MessageWindow mw = new MessageWindow("Sprinkler Controller Status Console", WinPosX, WinPosY);
 
 			// Put the status indicators under the panel...
 
-			Indicator si = new Indicator ("Security OFF", mw.GetX(), mw.GetY()+mw.Height());
+			//Indicator si = new Indicator ("Sprinkler OFF", mw.GetX(), mw.GetY()+mw.Height());
 			
 			mw.WriteMessage("Registered with the message manager." );
 
@@ -145,8 +148,8 @@ class SecurityController
 				} // catch
 
 				// If there are messages in the queue, we read through them.
-				// We are looking for MessageIDs = 7, this is a request to turn the
-				// security on/off. Note that we get all the messages
+				// We are looking for MessageIDs = 5, this is a request to turn the
+				// heater or chiller on. Note that we get all the messages
 				// at once... there is a 2.5 second delay between samples,.. so
 				// the assumption is that there should only be a message at most.
 				// If there are more, it is the last message that will effect the
@@ -158,27 +161,23 @@ class SecurityController
 				{
 					Msg = eq.GetMessage();
 
-					if ( Msg.GetMessageId() == 7 )
+					if ( Msg.GetMessageId() == 11 )
 					{
-						if (Msg.GetMessage().equalsIgnoreCase("A1")) // security armed
+						if (Msg.GetMessage().equalsIgnoreCase("S1")) // turn sprinkler on 
 						{
-							ArmedState = true;
-							mw.WriteMessage("Received security armed message" );
-
+							mw.WriteMessage("Received turn sprinkler on message" );
 							// Confirm that the message was recieved and acted on
-
-							ConfirmMessage( em, "A1" );
+							SprinklerMessage( em, "S1" );
 
 						} // if
 
-						if (Msg.GetMessage().equalsIgnoreCase("A0")) // disarm security
+						if (Msg.GetMessage().equalsIgnoreCase("S0")) // cancel sprinkler
 						{
-							ArmedState = false;
-							mw.WriteMessage("Received disarm security  message" );
+							mw.WriteMessage("Received cancel sprinkler  message" );
 
 							// Confirm that the message was recieved and acted on
 
-							ConfirmMessage( em, "A0" );
+							SprinklerMessage( em, "S0" );
 
 						} // 
 
@@ -209,26 +208,11 @@ class SecurityController
 						// Get rid of the indicators. The message panel is left for the
 						// user to exit so they can see the last message posted.
 
-						si.dispose();
+						//si.dispose();
 
 					} // if
 
 				} // for
-
-				// Update the lamp status
-
-				if (ArmedState)
-				{
-					// Set to green, heater is on
-
-					si.SetLampColorAndMessage("SECURITY ON", 1);
-
-				} else {
-
-					// Set to black, heater is off
-					si.SetLampColorAndMessage("SECURITY OFF", 0);
-
-				} // if
 
 
 				try
@@ -256,7 +240,7 @@ class SecurityController
 	/***************************************************************************
 	* CONCRETE METHOD:: ConfirmMessage
 	* Purpose: This method posts the specified message to the specified message
-	* manager. This method assumes an message ID of -7 which indicates a confirma-
+	* manager. This method assumes an message ID of -5 which indicates a confirma-
 	* tion of a command.
 	*
 	* Arguments: MessageManagerInterface ei - this is the messagemanger interface
@@ -270,11 +254,11 @@ class SecurityController
 	*
 	***************************************************************************/
 
-	static private void ConfirmMessage(MessageManagerInterface ei, String m )
+	static private void SprinklerMessage(MessageManagerInterface ei, String m )
 	{
 		// Here we create the message.
 
-		Message msg = new Message( (int) -7, m );
+		Message msg = new Message( (int) -11, m );
 
 		// Here we send the message to the message manager.
 
@@ -292,4 +276,4 @@ class SecurityController
 
 	} // PostMessage
 
-} // SecurityController
+} // SprinklerController
