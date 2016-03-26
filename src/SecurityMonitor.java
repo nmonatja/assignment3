@@ -27,7 +27,6 @@ class SecurityMonitor extends Thread
 	MessageWindow mw = null;					// This is the message window
 	Indicator si;								// Security indicator
         Indicator si2;								// Fire indicator
-        boolean systemArmed = false;
         boolean sprinklerUIDisplayed = false;
         
 
@@ -150,7 +149,7 @@ class SecurityMonitor extends Thread
 				{
 					Msg = eq.GetMessage();
 
-					if ( Msg.GetMessageId() == 3 && systemArmed) // Security reading
+					if ( Msg.GetMessageId() == 22) // Security reading
 					{
 						try
 						{
@@ -165,7 +164,27 @@ class SecurityMonitor extends Thread
 						} // catch
 
 					} // if
+                                        
+                                        //secuirty controller confirming that system is disarmed
+                                        if ( Msg.GetMessageId() == -7) 
+					{
+						try
+						{
+							if (Msg.GetMessage().equalsIgnoreCase("A0")) // disarm security
+                                                        {
+                                                            mw.WriteMessage("Received system disarmed message" );
+                                                            sysAlert = null;
+                                                        } 
+						} // try
 
+						catch( Exception e )
+						{
+							mw.WriteMessage("Error reading security alert: " + e);
+
+						} // catch
+
+					} // if
+                                        
                                         if ( Msg.GetMessageId() == 6) // Fire reading
 					{
 						try
@@ -222,9 +241,9 @@ class SecurityMonitor extends Thread
                                 mw.WriteMessage("Fire alert event:: " + fireAlert);
 				// Check temperature and effect control as necessary
 
-				if (!(sysAlert == null) && systemArmed) // something triggered security alert
+				if (!(sysAlert == null)) // something triggered security alert
 				{
-					si.SetLampColorAndMessage("ALERT", 3);
+					si.SetLampColorAndMessage(sysAlert, 3);
 
 				} 
                                 else {
@@ -345,13 +364,9 @@ class SecurityMonitor extends Thread
 		if ( ON )
 		{
 			msg = new Message( (int) 7, "A1" );
-                        systemArmed = true;
-
 		} else {
 
 			msg = new Message( (int) 7, "A0" );
-                        systemArmed = false;
-
 		} // if
 
 		// Here we send the message to the message manager.

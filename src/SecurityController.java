@@ -38,6 +38,7 @@ class SecurityController
 		boolean ArmedState = false;		// Armed state: false == off, true == on
 		int	Delay = 2500;					// The loop delay (2.5 seconds)
 		boolean Done = false;				// Loop termination flag
+                String sysAlert = null;
 
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the IP address of the message manager
@@ -158,6 +159,24 @@ class SecurityController
 				{
 					Msg = eq.GetMessage();
 
+                                        if ( Msg.GetMessageId() == 3 && ArmedState) // Security reading
+					{
+						try
+						{
+							sysAlert = Msg.GetMessage();
+                                                        //system is armed and alert is triggered
+                                                        AlertTriggered( em, sysAlert );
+						} // try
+
+						catch( Exception e )
+						{
+							mw.WriteMessage("Error reading security alert: " + e);
+
+						} // catch
+
+					} // if
+                                        
+                                        
 					if ( Msg.GetMessageId() == 7 )
 					{
 						if (Msg.GetMessage().equalsIgnoreCase("A1")) // security armed
@@ -292,4 +311,26 @@ class SecurityController
 
 	} // PostMessage
 
+        static private void AlertTriggered(MessageManagerInterface ei, String m )
+	{
+		// Here we create the message.
+
+		Message msg = new Message( (int) 22, m );
+
+		// Here we send the message to the message manager.
+
+		try
+		{
+			ei.SendMessage( msg );
+
+		} // try
+
+		catch (Exception e)
+		{
+			System.out.println("Error Confirming Message:: " + e);
+
+		} // catch
+
+	} // PostMessage
+        
 } // SecurityController

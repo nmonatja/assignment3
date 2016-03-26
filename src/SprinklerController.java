@@ -10,7 +10,7 @@
 *
 * This class simulates a device that controls sprinkler. It polls the message manager for message ids = 11
 * and reacts to them by turning on or canceling the sprinkler. The following command are valid strings for con
-* trolling the heater and chiller:
+* trolling the sprinkler:
 *
 *	S1 = sprinkler on
 *	S0 = cancel sprinkler
