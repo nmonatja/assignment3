@@ -20,10 +20,7 @@ public class SprinklerInput extends javax.swing.JFrame {
      * Creates new form SprinklerInput
      */
     public SprinklerInput() {
-        initComponents();
-        
-        this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-        
+        initComponents();        
         timer = new Timer(1000, new TimerListener());
         timer.start();
     }
@@ -44,7 +41,12 @@ public class SprinklerInput extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jButton1.setText("Confirm Sprinkler");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -120,6 +122,13 @@ public class SprinklerInput extends javax.swing.JFrame {
         Done = true;
         this.dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        sprinklerAction = "activate";
+        Done = true;
+        SprinklerInput.this.dispose(); //calls dispose on the outer or parent class
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
