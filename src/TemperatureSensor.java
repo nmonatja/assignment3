@@ -25,14 +25,24 @@ import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class TemperatureSensor
+class TemperatureSensor extends DeviceHealthCheck
 {
+    static String deviceID = "2";
+    static int isAliveMsgID = 98;
+    static String msgMgrIP = "";
+	
+    @Override 
+    public String MsgMgrIP() { 
+        return msgMgrIP; 
+    }
+    
 	public static void main(String args[])
 	{
-		String MsgMgrIP;				// Message Manager IP address
+		// MsgMgrIP is instantiated in the superclass but may need to be set to an IP below
 		Message Msg = null;				// Message object
 		MessageQueue eq = null;			// Message Queue
 		int MsgId = 0;					// User specified message ID
+                //String deviceID = "2";
 		MessageManagerInterface em = null;// Interface object to the message manager
 		boolean HeaterState = false;	// Heater state: false == off, true == on
 		boolean ChillerState = false;	// Chiller state: false == off, true == on
@@ -48,54 +58,22 @@ class TemperatureSensor
  		if ( args.length == 0 )
  		{
 			// message manager is on the local system
-
 			System.out.println("\n\nAttempting to register on the local machine..." );
 
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is on the local machine
-
-				em = new MessageManagerInterface();
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
 		} else {
-
 			// message manager is not on the local system
-
-			MsgMgrIP = args[0];
-
-			System.out.println("\n\nAttempting to register on the machine:: " + MsgMgrIP );
-
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is NOT on the local machine
-
-				em = new MessageManagerInterface( MsgMgrIP );
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
+			msgMgrIP = args[0];
+			System.out.println("\n\nAttempting to register on the machine:: " + msgMgrIP );
 		} // if
+		
+                // have to instantiate this class in order to reference the non-static getMessageManager() method
+                TemperatureSensor ts = new TemperatureSensor();
+		em = ts.getMessageManager();
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
-
-
 		if (em != null)
 		{
-
 			// We create a message window. Note that we place this panel about 1/2 across
 			// and 1/3 down the screen
 
@@ -103,41 +81,30 @@ class TemperatureSensor
 								 	//of a percentage of the screen height
 			float WinPosY = 0.3f; 	//This is the Y position of the message window in terms
 								 	//of a percentage of the screen height
-
 			MessageWindow mw = new MessageWindow("Temperature Sensor", WinPosX, WinPosY );
-
 			mw.WriteMessage("Registered with the message manager." );
-
 	    	try
 	    	{
 				mw.WriteMessage("   Participant id: " + em.GetMyId() );
 				mw.WriteMessage("   Registration Time: " + em.GetRegistrationTime() );
-
 			} // try
 
 	    	catch (Exception e)
 			{
 				mw.WriteMessage("Error:: " + e);
-
 			} // catch
-
 			mw.WriteMessage("\nInitializing Temperature Simulation::" );
-
 			CurrentTemperature = (float)50.00;
-
 			if ( CoinToss() )
 			{
 				DriftValue = GetRandomNumber() * (float) -1.0;
-
 			} else {
-
 				DriftValue = GetRandomNumber();
-
 			} // if
 
 			mw.WriteMessage("   Initial Temperature Set:: " + CurrentTemperature );
 			mw.WriteMessage("   Drift Value Set:: " + DriftValue );
-
+                        
 			/********************************************************************
 			** Here we start the main simulation loop
 			*********************************************************************/
@@ -150,21 +117,16 @@ class TemperatureSensor
 				// Post the current temperature
 
 				PostTemperature( em, CurrentTemperature );
-
 				mw.WriteMessage("Current Temperature::  " + CurrentTemperature + " F");
-
 				// Get the message queue
-
 				try
 				{
 					eq = em.GetMessageQueue();
-
 				} // try
 
 				catch( Exception e )
 				{
 					mw.WriteMessage("Error getting message queue::" + e );
-
 				} // catch
 
 				// If there are messages in the queue, we read through them.
@@ -351,12 +313,14 @@ class TemperatureSensor
 		// Here we create the message.
 
 		Message msg = new Message( (int) 1, String.valueOf(temperature) );
+		Message isAlive = new Message ( isAliveMsgID, deviceID);
 
 		// Here we send the message to the message manager.
 
 		try
 		{
 			ei.SendMessage( msg );
+			ei.SendMessage( isAlive );
 			//System.out.println( "Sent Temp Message" );
 
 		} // try
