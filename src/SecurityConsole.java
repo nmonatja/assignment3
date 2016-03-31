@@ -65,6 +65,7 @@ public class SecurityConsole
 				System.out.println( "Select an Option: \n" );
 				System.out.println( "1: Arm the security" );
 				System.out.println( "2: Disarm the security" );
+				System.out.println( "3: Turn off Sprinklers" );
 				System.out.println( "X: Stop System\n" );
 				System.out.print( "\n>>>> " );
 				Option = UserInput.KeyboardReadString();
@@ -86,6 +87,17 @@ public class SecurityConsole
 				{
 					Monitor.ArmSecurity(false);
 				} // if
+                                
+                                //////////// option 3 ////////////
+                                
+                                if ( Option.equals( "3" ) )
+                                {
+                                    if (Monitor.isSprinklerOn()) {
+                                        Monitor.stopSprinkler();
+                                    } else {
+                                        System.out.println( "Sprinkler is not active currently. \n" );
+                                    }
+                                } // if
 
 				//////////// option X ////////////
 

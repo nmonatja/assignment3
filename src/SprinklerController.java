@@ -254,7 +254,7 @@ class SprinklerController
 	*
 	***************************************************************************/
 
-	static private void SprinklerMessage(MessageManagerInterface ei, String m )
+	static public void SprinklerMessage(MessageManagerInterface ei, String m )
 	{
 		// Here we create the message.
 
@@ -275,5 +275,11 @@ class SprinklerController
 		} // catch
 
 	} // PostMessage
+        
+        static public Boolean SprinklerStatus() {
+            Boolean isOn = false;
+            // try to get Sprinkler status from MessageManager somehow?
+            return isOn;
+        }
 
 } // SprinklerController

@@ -142,7 +142,6 @@ class SmokeDetector
 				System.out.println( "Start/stop fire simulation: \n" );
 				System.out.println( "1: Fire" );
                                 System.out.println( "2: STOP fire" );
-                                System.out.println( "3: STOP sprinkler");
 				System.out.print( "\n>>>> " );
 				Option = UserInput.KeyboardReadString();
 
@@ -160,6 +159,7 @@ class SmokeDetector
 					fireAlert = null;
 				} // if
 				
+                                mw.WriteMessage("Current fire alert::  " + fireAlert);
 				// Get the message queue
 
 				try
@@ -173,16 +173,9 @@ class SmokeDetector
 					mw.WriteMessage("Error getting message queue::" + e );
 
 				} // catch
-                                
-                                if ( !Option.equals("3")) {
-                                    mw.WriteMessage("Current fire alert::  " + fireAlert);
-                                    // Post the fire alert
-                                    PostSecurityAlert( em, fireAlert );
-                                } else {
-                                    mw.WriteMessage("Stopping sprinklers...");
-                                    SprinklerControl( em, "S0");
-                                }
 
+                                // Post the fire alert
+                                PostSecurityAlert( em, fireAlert );
                                 
 				// Here we wait for a 2.5 seconds before we start the next sample
 
@@ -247,15 +240,4 @@ class SmokeDetector
 
 	} // PostSecurityAlert
         
-        static private void SprinklerControl(MessageManagerInterface ei, String status)
-        {
-            Message msg = new Message((int) 11, status);
-            
-            try {
-                ei.SendMessage(msg);
-            } catch (Exception e) {
-                System.out.println("Error sending sprinkler control message:: "+e);
-            }
-        }//SprinklerControl
-
 } // SmokeDetector

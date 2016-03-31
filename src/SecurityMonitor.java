@@ -394,5 +394,14 @@ class SecurityMonitor extends Thread
                 }			    
         }
         
+        public Boolean isSprinklerOn() {
+            // return SprinklerController.SprinklerStatus();
+            return true;
+        }
+        
+        public void stopSprinkler() {
+            SprinklerController.SprinklerMessage(em, "S0");
+        }
+        
         
 } // SecurityMonitor
