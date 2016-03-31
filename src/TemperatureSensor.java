@@ -13,7 +13,7 @@
 * room temperature is posted to the message manager.
 *
 * Parameters: IP address of the message manager (on command line). If blank, it is assumed that the message manager is
-* on the local machine.
+* on the local machine.   
 *
 * Internal Methods:
 *	float GetRandomNumber()
