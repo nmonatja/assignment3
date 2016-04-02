@@ -28,6 +28,7 @@ import java.util.*;
 class TemperatureSensor extends DeviceHealthCheck
 {
     static String deviceID = "2";
+    static int isAliveMsgID = 98;
     static String msgMgrIP = "";
 	
     @Override 
@@ -41,7 +42,6 @@ class TemperatureSensor extends DeviceHealthCheck
 		Message Msg = null;				// Message object
 		MessageQueue eq = null;			// Message Queue
 		int MsgId = 0;					// User specified message ID
-                //String deviceID = "2";
 		MessageManagerInterface em = null;// Interface object to the message manager
 		boolean HeaterState = false;	// Heater state: false == off, true == on
 		boolean ChillerState = false;	// Chiller state: false == off, true == on
@@ -49,6 +49,7 @@ class TemperatureSensor extends DeviceHealthCheck
 		float DriftValue;				// The amount of temperature gained or lost
 		int	Delay = 2500;				// The loop delay (2.5 seconds)
 		boolean Done = false;			// Loop termination flag
+                //DeviceHealthCheck ts1;
 
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the IP address of the message manager
@@ -68,9 +69,6 @@ class TemperatureSensor extends DeviceHealthCheck
                 // have to instantiate this class in order to reference the non-static getMessageManager() method
                 TemperatureSensor ts = new TemperatureSensor();
 		em = ts.getMessageManager();
-                /* Setup and start the device to start health check*/
-                ts.setup(deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
-                ts.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
@@ -119,6 +117,9 @@ class TemperatureSensor extends DeviceHealthCheck
 				// Post the current temperature
 
 				PostTemperature( em, CurrentTemperature );
+                                DeviceHealthCheck tsCheck = new DeviceHealthCheck();
+                                tsCheck.isAlive(isAliveMsgID, deviceID);
+                                
 				mw.WriteMessage("Current Temperature::  " + CurrentTemperature + " F");
 				// Get the message queue
 				try
@@ -315,12 +316,14 @@ class TemperatureSensor extends DeviceHealthCheck
 		// Here we create the message.
 
 		Message msg = new Message( (int) 1, String.valueOf(temperature) );
+		//Message isAlive = new Message ( isAliveMsgID, deviceID);
 
 		// Here we send the message to the message manager.
 
 		try
 		{
 			ei.SendMessage( msg );
+			//ei.SendMessage( isAlive );
 			//System.out.println( "Sent Temp Message" );
 
 		} // try

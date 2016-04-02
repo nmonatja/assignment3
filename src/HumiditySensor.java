@@ -25,9 +25,17 @@ import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class HumiditySensor
+class HumiditySensor extends DeviceHealthCheck
 {
-
+        static String deviceID = "1";
+        static int isAliveMsgID = 98;
+        static String msgMgrIP = "";
+        
+        @Override 
+    public String MsgMgrIP() { 
+        return msgMgrIP; 
+    }
+        
 	public static void main(String args[])
 	{
 		String MsgMgrIP;					// Message Manager IP address
@@ -51,46 +59,17 @@ class HumiditySensor
  		if ( args.length == 0 )
  		{
 			// message manager is on the local system
-
 			System.out.println("\n\nAttempting to register on the local machine..." );
 
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is on the local machine
-
-				em = new MessageManagerInterface();
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
 		} else {
-
 			// message manager is not on the local system
-
-			MsgMgrIP = args[0];
-
-			System.out.println("\n\nAttempting to register on the machine:: " + MsgMgrIP );
-
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is NOT on the local machine
-
-				em = new MessageManagerInterface( MsgMgrIP );
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
+			msgMgrIP = args[0];
+			System.out.println("\n\nAttempting to register on the machine:: " + msgMgrIP );
 		} // if
+		
+                // have to instantiate this class in order to reference the non-static getMessageManager() method
+                HumiditySensor hs = new HumiditySensor();
+		em = hs.getMessageManager();
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
@@ -152,21 +131,19 @@ class HumiditySensor
 				// Post the current relative humidity
 
 				PostHumidity( em, RelativeHumidity );
+                                DeviceHealthCheck hsCheck = new DeviceHealthCheck();
+                                hsCheck.isAlive(isAliveMsgID, deviceID);
 
 				mw.WriteMessage("Current Relative Humidity:: " + RelativeHumidity + "%");
-
 				// Get the message queue
-
 				try
 				{
 					eq = em.GetMessageQueue();
-
 				} // try
 
 				catch( Exception e )
 				{
 					mw.WriteMessage("Error getting message queue::" + e );
-
 				} // catch
 
 				// If there are messages in the queue, we read through them.
@@ -182,53 +159,40 @@ class HumiditySensor
 				for ( int i = 0; i < qlen; i++ )
 				{
 					Msg = eq.GetMessage();
-
 					if ( Msg.GetMessageId() == -4 )
 					{
 						if (Msg.GetMessage().equalsIgnoreCase("H1")) // humidifier on
 						{
 							HumidifierState = true;
-
 						} // if
-
 						if (Msg.GetMessage().equalsIgnoreCase("H0")) // humidifier off
 						{
 							HumidifierState = false;
-
 						} // if
-
 						if (Msg.GetMessage().equalsIgnoreCase("D1")) // dehumidifier on
 						{
 							DehumidifierState = true;
-
 						} // if
-
 						if (Msg.GetMessage().equalsIgnoreCase("D0")) // dehumidifier off
 						{
 							DehumidifierState = false;
-
 						} // if
-
 					} // if
 
 					// If the message ID == 99 then this is a signal that the simulation
 					// is to end. At this point, the loop termination flag is set to
 					// true and this process unregisters from the message manager.
-
 					if ( Msg.GetMessageId() == 99 )
 					{
 						Done = true;
-
 						try
 						{
 							em.UnRegister();
-
 				    	} // try
 
 				    	catch (Exception e)
 				    	{
 							mw.WriteMessage("Error unregistering: " + e);
-
 				    	} // catch
 
 				    	mw.WriteMessage("\n\nSimulation Stopped. \n");
@@ -353,14 +317,14 @@ class HumiditySensor
 		// Here we create the message.
 
 		Message msg = new Message( (int) 2, String.valueOf(humidity) );
-
+                //Message isAlive = new Message ( isAliveMsgID, deviceID);
 		// Here we send the message to the message manager.
 
 		try
 		{
 			ei.SendMessage( msg );
 			//mw.WriteMessage( "Sent Humidity Message" );
-
+                        //ei.SendMessage( isAlive );
 		} // try
 
 		catch (Exception e)
