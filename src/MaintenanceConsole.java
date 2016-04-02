@@ -48,7 +48,7 @@ public class MaintenanceConsole
             {
                 // Here, the main thread continues and provides the main menu
 
-                System.out.println( "\n Maintenance Console");
+                /*System.out.println( "\n Maintenance Console");
                 System.out.println( "Select an Option: \n" );
                 System.out.println( "1: List Responsive Devices" );
                 System.out.println( "X: Stop System\n" );
@@ -68,7 +68,13 @@ public class MaintenanceConsole
                 }
                 else {
                     System.out.println("\n Not a valid option! Please try again!");
-                }
+                }*/
+                Monitor.listAliveDevices();
+                try {
+                        Thread.sleep(2000);                 //1000 milliseconds is one second.
+                    } catch(InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
             } // while
         } else {
             System.out.println("\n\nUnable start the monitor.\n\n" );

@@ -199,10 +199,16 @@ class MaintenanceMonitor extends Thread
             Iterator<Integer> keySet = deviceMap1.keySet().iterator();
             while (keySet.hasNext()){
                 Integer key = keySet.next();
-                boolean status = deviceMap1.get(key).getStatus();
+                //boolean status = deviceMap1.get(key).getStatus();
+                String status = "";
                 long msgTime = deviceMap1.get(key).getTime();
                 long currTime = System.currentTimeMillis();
                 long aliveTime = currTime - msgTime;
+                if (aliveTime < 5000){
+                    status = "Alive";
+                } else {
+                    status = "No communication";
+                }
                 String deviceName = "";
                 String deviceDesc = "";
                 switch(key){
@@ -214,7 +220,8 @@ class MaintenanceMonitor extends Thread
                             break;
                 }
                 System.out.println("DeviceID:" + key + ",  " + deviceName + ", "+ deviceDesc + ","
-                        + "\n  Last Msg Recieved:" + aliveTime+"ms");
+                        + "\n Status:"+status+"  Last Msg Recieved:" + aliveTime+"ms\n");
+                //Object[] dataValues = new Object[] {key, deviceName, status, aliveTime};
                 //System.out.println("\n");
             }
             System.out.println("\n");
