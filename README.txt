@@ -10,3 +10,10 @@ Step 0. Compile and run rmic (same as the assignment instructions)
 Step 1. Run EMStart
 Step 2. Run SystemBStart
 Step 3. Run few tests: from SMOKE DETECTOR, select 1: Fire. In Security Monitoring Console FIRE ALARM indiactor should show RED and UI should pop up, prompting to Confirm Sprinkler or Cancel Sprinkler. Click on Confirm Sprinkler. Under SPRINKLER - Sprinkler Status window, you should see a message "Received turn sprinkler on message" and SPRINKLER ON (green).
+
+
+System C
+Step 0. Compile and run rmic (same as the assignment instructions)
+Step 1. Run EMStart
+Step 2. Run SystemCStart
+Step 3. Run few tests: Close one of the devices that are connected. Watch the "Time since last message" increase. Once it is greater than 5s, Status should transition to "No COmmunication".
