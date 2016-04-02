@@ -28,7 +28,6 @@ import java.util.*;
 class TemperatureSensor extends DeviceHealthCheck
 {
     static String deviceID = "2";
-    static int isAliveMsgID = 98;
     static String msgMgrIP = "";
 	
     @Override 
@@ -69,6 +68,9 @@ class TemperatureSensor extends DeviceHealthCheck
                 // have to instantiate this class in order to reference the non-static getMessageManager() method
                 TemperatureSensor ts = new TemperatureSensor();
 		em = ts.getMessageManager();
+                /* Setup and start the device to start health check*/
+                ts.setup(deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+                ts.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
@@ -117,9 +119,6 @@ class TemperatureSensor extends DeviceHealthCheck
 				// Post the current temperature
 
 				PostTemperature( em, CurrentTemperature );
-                                DeviceHealthCheck tsCheck = new DeviceHealthCheck();
-                                tsCheck.isAlive(isAliveMsgID, deviceID);
-                                
 				mw.WriteMessage("Current Temperature::  " + CurrentTemperature + " F");
 				// Get the message queue
 				try

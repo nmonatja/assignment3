@@ -28,7 +28,6 @@ import java.util.*;
 class HumiditySensor extends DeviceHealthCheck
 {
         static String deviceID = "1";
-        static int isAliveMsgID = 98;
         static String msgMgrIP = "";
         
         @Override 
@@ -70,6 +69,9 @@ class HumiditySensor extends DeviceHealthCheck
                 // have to instantiate this class in order to reference the non-static getMessageManager() method
                 HumiditySensor hs = new HumiditySensor();
 		em = hs.getMessageManager();
+                /* Setup and start the device to start health check*/
+                hs.setup(deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+                hs.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
@@ -131,9 +133,6 @@ class HumiditySensor extends DeviceHealthCheck
 				// Post the current relative humidity
 
 				PostHumidity( em, RelativeHumidity );
-                                DeviceHealthCheck hsCheck = new DeviceHealthCheck();
-                                hsCheck.isAlive(isAliveMsgID, deviceID);
-
 				mw.WriteMessage("Current Relative Humidity:: " + RelativeHumidity + "%");
 				// Get the message queue
 				try
