@@ -395,8 +395,7 @@ class SecurityMonitor extends Thread
         }
         
         public Boolean isSprinklerOn() {
-            // return SprinklerController.SprinklerStatus();
-            return true;
+            return SprinklerController.SprinklerStatus(em);
         }
         
         public void stopSprinkler() {

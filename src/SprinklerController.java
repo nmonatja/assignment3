@@ -254,9 +254,36 @@ class SprinklerController extends DeviceHealthCheck
 
 	} // PostMessage
         
-        static public Boolean SprinklerStatus() {
+        static public Boolean SprinklerStatus(MessageManagerInterface ei) {
             Boolean isOn = false;
-            // try to get Sprinkler status from MessageManager somehow?
+            Message Msg = null;
+            
+            // iterate over the message queue to see if the sprinkler is on or off?
+            // just keep resetting isOn untill you've iterated through all the messages and the last one wins
+            // this doesn't seem very performant :(
+            try {
+                MessageQueue eq = ei.GetMessageQueue();
+                
+                int qlen = eq.GetSize();
+                for ( int i = 0; i < qlen; i++ ) {
+                    Msg = eq.GetMessage();
+                    
+                    if ( Msg.GetMessageId() == -11) {
+                        if (Msg.GetMessage().equalsIgnoreCase("S0")) {
+                            isOn = false;
+                        }
+                        
+                        if (Msg.GetMessage().equalsIgnoreCase("S1")) {
+                            isOn = true;
+                        }
+                            
+                    }
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Could not determine sprinkler status "+e);
+            }
+            
             return isOn;
         }
 
