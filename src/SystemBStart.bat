@@ -11,5 +11,7 @@ START "SMOKE DETECTOR" /MIN /NORMAL java SmokeDetector %1
 START "SECURITY SENSOR CONSOLE" /MIN /NORMAL java SecurityAlertSensor %1
 %ECHO Starting Sprinkler Controller
 START "SPRINKLER CONTROLLER" /MIN /NORMAL java SprinklerController %1
+%ECHO Starting Fire Alarm Controller
+START "FIRE ALARM CONTROLLER" /MIN /NORMAL java FireAlarmController %1
 %ECHO Starting Sprinkler
 START "SPRINKLER" /MIN /NORMAL java Sprinkler %1

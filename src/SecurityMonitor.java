@@ -185,7 +185,7 @@ class SecurityMonitor extends Thread
 
 					} // if
                                         
-                                        if ( Msg.GetMessageId() == 6) // Fire reading
+                                        if ( Msg.GetMessageId() == -8) // Fire reading
 					{
 						try
 						{

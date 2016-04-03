@@ -29,6 +29,7 @@ class FireAlarmController
 		int	Delay = 2500;					// The loop delay (2.5 seconds)
 		boolean Done = false;				// Loop termination flag
                 boolean activateSprinkler = false;
+                String fireAlert = null;
 		/////////////////////////////////////////////////////////////////////////////////
 		// Get the IP address of the message manager
 		/////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +99,7 @@ class FireAlarmController
 
 			// Put the status indicators under the panel...
 
-			Indicator si = new Indicator ("Fire Alarm OFF", mw.GetX(), mw.GetY()+mw.Height());
+			
 			
 			mw.WriteMessage("Registered with the message manager." );
 
@@ -148,10 +149,21 @@ class FireAlarmController
 				{
 					Msg = eq.GetMessage();
 
-					if ( Msg.GetMessageId() == 6 )//NEEDS WORK HERE****************
+					if ( Msg.GetMessageId() == 6 )
 					{
 						
+                                            try
+						{
+							fireAlert = Msg.GetMessage();
+                                                        //fire alert detected
+                                                        FireDetected( em, fireAlert );
+						} // try
 
+						catch( Exception e )
+						{
+							mw.WriteMessage("Error reading security alert: " + e);
+
+						} // catch
 
 					} // if
 
@@ -180,7 +192,6 @@ class FireAlarmController
 						// Get rid of the indicators. The message panel is left for the
 						// user to exit so they can see the last message posted.
 
-						si.dispose();
 
 					} // if
 
@@ -229,7 +240,6 @@ class FireAlarmController
 	static private void FireDetected(MessageManagerInterface ei, String m )
 	{
 		// Here we create the message.
-
 		Message msg = new Message( (int) -8, m );
 
 		// Here we send the message to the message manager.
