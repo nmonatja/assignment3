@@ -43,10 +43,6 @@ public class DeviceHealthCheck {
             Message msg = new Message (alive_msg_id, deviceID);
 		
             try {
-                if (msg_mgr_if == null)
-                {
-                    msg_mgr_if = getMessageManager();
-                }
                 
                 if(msg_mgr_if != null)
                 {
@@ -64,18 +60,10 @@ public class DeviceHealthCheck {
         
         public void setup(String deviceID, int timerRate)
         {
-            if (msg_mgr_if == null) {
-                 msg_mgr_if = getMessageManager();
-            }
-            
-            if (msg_mgr_if != null) {
-                device_id       = deviceID;
-                if(timerRate != -1)
-                {
-                    timer_rate      = timerRate;
-                }
-            } else {
-                System.out.println("Unable to get Message Manager Interface\n");
+            device_id       = deviceID;
+            if(timerRate != -1)
+            {
+                timer_rate      = timerRate;
             }
         }
 	
