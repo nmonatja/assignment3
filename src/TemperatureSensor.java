@@ -69,7 +69,7 @@ class TemperatureSensor extends DeviceHealthCheck
                 TemperatureSensor ts = new TemperatureSensor();
 		em = ts.getMessageManager();
                 /* Setup and start the device to start health check*/
-                ts.setup(deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+                ts.setup(em, deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
                 ts.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
@@ -180,6 +180,8 @@ class TemperatureSensor extends DeviceHealthCheck
 					if ( Msg.GetMessageId() == 99 )
 					{
 						Done = true;
+                                                
+                                                ts.stop();
 
 						try
 						{

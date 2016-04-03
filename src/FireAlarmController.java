@@ -19,6 +19,9 @@ import java.util.*;
 
 class FireAlarmController
 {
+    static String deviceID = "6";
+    static String msgMgrIP = "";
+	
 	public static void main(String args[])
 	{
 		String MsgMgrIP;					// Message Manager IP address
@@ -37,46 +40,20 @@ class FireAlarmController
  		if ( args.length == 0 )
  		{
 			// message manager is on the local system
-
 			System.out.println("\n\nAttempting to register on the local machine..." );
 
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is on the local machine
-
-				em = new MessageManagerInterface();
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
 		} else {
-
 			// message manager is not on the local system
-
 			MsgMgrIP = args[0];
-
 			System.out.println("\n\nAttempting to register on the machine:: " + MsgMgrIP );
-
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is NOT on the local machine
-
-				em = new MessageManagerInterface( MsgMgrIP );
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
 		} // if
+
+		// have to instantiate this class in order to reference the non-static getMessageManager() method
+		FireAlarmController fc = new FireAlarmController();
+		em = fc.getMessageManager();
+		/* Setup and start the device to start health check*/
+		fc.setup(em, deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+		fc.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
@@ -174,6 +151,8 @@ class FireAlarmController
 					if ( Msg.GetMessageId() == 99 )
 					{
 						Done = true;
+						
+						fc.stop();
 
 						try
 						{

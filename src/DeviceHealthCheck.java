@@ -7,7 +7,7 @@ public class DeviceHealthCheck {
         Timer   cop_timer                   = null;
         int     alive_msg_id                = 98;
         String  device_id                   = null;
-        int     timer_rate                  = 1000;
+        int     timer_rate                  = 3000;
         MessageManagerInterface msg_mgr_if  = null;
 	
 	// override this method in your subclass if there is an IP set
@@ -38,11 +38,17 @@ public class DeviceHealthCheck {
 	}
 	
 	
-	public void isAlive(String deviceID) {
-		
+	public void isAlive(String deviceID) 
+        {
+
             Message msg = new Message (alive_msg_id, deviceID);
 		
-            try {
+            try 
+            {
+                if (msg_mgr_if == null)
+                {
+                    msg_mgr_if = getMessageManager();
+                }
                 
                 if(msg_mgr_if != null)
                 {
@@ -53,42 +59,57 @@ public class DeviceHealthCheck {
                     System.out.println("Unable to get Message Manager Interface\n");
                 }
 			
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
 		System.out.println("Error sending isAlive message "+e);
             }
 	}
         
-        public void setup(String deviceID, int timerRate)
+        public void setup(MessageManagerInterface em, String deviceID, int timerRate)
         {
-            device_id       = deviceID;
-            if(timerRate != -1)
+            
+            msg_mgr_if = em;
+            
+            if (msg_mgr_if != null) 
             {
-                timer_rate      = timerRate;
+                device_id       = deviceID;
+                if(timerRate != -1)
+                {
+                    timer_rate      = timerRate;
+                }
+            } 
+            else 
+            {
+                System.out.println("Unable to get Message Manager Interface\n");
             }
         }
 	
-	public void start() {
-		
-            if (msg_mgr_if == null) {
-                msg_mgr_if = getMessageManager();
-            }
-            
-            if (msg_mgr_if != null) {
+	public void start() 
+        {
+            if (msg_mgr_if != null) 
+            {
                 cop_timer = new Timer();
                 cop_timer.scheduleAtFixedRate(new HealthReportTask(), timer_rate, timer_rate);
-            } else {
+            } 
+            else 
+            {
                 System.out.println("Unable to start due because no Message Manager Interface\n");
             }
 	}
         
-        class HealthReportTask extends TimerTask {
-            public void run () {
+        class HealthReportTask extends TimerTask 
+        {
+            public void run () 
+            {
                 isAlive(device_id);
             }   
         }
         
-        public void stop() {
-            if (cop_timer !=null) {
+        public void stop() 
+        {
+            if (cop_timer !=null) 
+            {
                 cop_timer.cancel();
             }
         }

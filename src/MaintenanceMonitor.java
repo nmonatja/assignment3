@@ -26,9 +26,12 @@
 ******************************************************************************************************************/
 import InstrumentationPackage.*;
 import MessagePackage.*;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 //import java.util.Set;
 //import java.util.concurrent.TimeUnit;
 
@@ -39,14 +42,41 @@ class MaintenanceMonitor extends Thread
 	private String MsgMgrIP = null;				// Message Manager IP address
 	boolean Registered = true;					// Signifies that this class is registered with an message manager.
 	MessageWindow mw = null;					// This is the message window
+        
+        static int AliveTimeOut  = 10000; //ms
+        
+        
         public static final String TEMP_SENSOR = "Temperature Sensor";
         public static final String TEMP_SENSOR_DESC = "The temperature reading";
         public static final String HUM_SENSOR = "Humidity Sensor";
         public static final String HUM_SENSOR_DESC = "The humidity reading";
+        
         //private deviceMonitor deviceList;
         //private deviceMonitor deviceD;
         //private static HashMap deviceMap1 = new HashMap();
         public static Map<Integer, deviceRecord> deviceMap1 = new HashMap<Integer, deviceRecord>();
+        
+        MaintenanceView maintView = null;
+        
+        class DeviceDesc
+        {
+            int         DeviceID = 0;
+            String      DeviceName = "Unknown";
+            Boolean     DeviceActive = false;
+            long        SystemTimeAtActive = 0;
+            long        LastUpdateTime = 0;
+            
+            DeviceDesc()
+            {
+            }
+            DeviceDesc(int devID, String devName)
+            {
+                DeviceID = devID;
+                DeviceName = devName;
+            }
+        }
+        ArrayList<DeviceDesc> DeviceList  = new ArrayList<DeviceDesc>();
+        
         
 	public MaintenanceMonitor()
 	{
@@ -88,6 +118,7 @@ class MaintenanceMonitor extends Thread
 		int MsgId = 0;					// User specified message ID
 		int	Delay = 1000;				// The loop delay (1 second)
 		boolean Done = false;			// Loop termination flag               
+                
               
 		if (em != null)
 		{
@@ -98,6 +129,13 @@ class MaintenanceMonitor extends Thread
 			// indicators are placed directly to the right, one on top of the other
 			mw = new MessageWindow("Maintenance Monitoring Console", 0.6f, 0);
 			mw.WriteMessage( "Registered with the message manager." );
+                        
+                       
+                        maintView = new MaintenanceView();
+                        initMaintenanceView();
+                        maintView.setVisible(true);
+                            
+                        
 	    	try
 	    	{
 				mw.WriteMessage("   Participant id: " + em.GetMyId() );
@@ -142,8 +180,17 @@ class MaintenanceMonitor extends Thread
                                                     //isAliveMon.isAliveList(Msg.GetMessage());
                                                     mw.WriteMessage( "Device " + Msg.GetMessage() + " connected" );
                                                     //deviceList.deviceMap.put(Msg.GetMessage(),1);
+                                                    long lastUpdateTime = 0;
+                                                    Integer deviceID = Integer.valueOf(Msg.GetMessage());
+                                                    deviceRecord devRec = deviceMap1.get(deviceID);
+                                                    if(devRec !=null)
+                                                    {
+                                                        lastUpdateTime= devRec.getTime();
+                                                    }
+                                                    
                                                     long currTime = System.currentTimeMillis();
-                                                    deviceMap1.put(Integer.valueOf(Msg.GetMessage()),new deviceRecord(true,currTime));
+                                                    deviceMap1.put(Integer.valueOf(deviceID),new deviceRecord(true,currTime));
+                                                    
                                                     
                                                     //deviceList.deviceMap.put(Msg.GetMessage(), new deviceRecord.getStatus(1));
                                                     //new deviceMonitor.deviceRecord()
@@ -204,7 +251,7 @@ class MaintenanceMonitor extends Thread
                 long msgTime = deviceMap1.get(key).getTime();
                 long currTime = System.currentTimeMillis();
                 long aliveTime = currTime - msgTime;
-                if (aliveTime < 5000){
+                if (aliveTime < AliveTimeOut){
                     status = "Alive";
                 } else {
                     status = "No communication";
@@ -225,6 +272,107 @@ class MaintenanceMonitor extends Thread
                 //System.out.println("\n");
             }
             System.out.println("\n");
+        }
+        public void initMaintenanceView()
+        {
+            DeviceList.add(new DeviceDesc(1, "Humidity Sensor"));
+            DeviceList.add(new DeviceDesc(2, "Temperature Sensor"));
+            DeviceList.add(new DeviceDesc(3, "Security Alert Sensor"));
+            DeviceList.add(new DeviceDesc(4, "Smoke Detector"));
+            DeviceList.add(new DeviceDesc(5, "Sprinkler"));
+            DeviceList.add(new DeviceDesc(6, "Fire Alarm Controller"));
+            DeviceList.add(new DeviceDesc(7, "Humidity Controller"));
+            DeviceList.add(new DeviceDesc(8, "Security Controller"));
+            DeviceList.add(new DeviceDesc(9, "Sprinkler Controller"));
+            DeviceList.add(new DeviceDesc(10, "Temperature Controller"));
+
+            if(maintView !=null)
+            {
+                for(DeviceDesc d : DeviceList)
+                {
+                    maintView.InsertNewDeviceEntry(Integer.toString(d.DeviceID),d.DeviceName, "Unknown",  "Unknown", "Unknown");
+                
+                }
+            }
+        
+        }
+        public void updateAllDevices()
+        {
+            for(DeviceDesc d : DeviceList)
+            {
+                long lastUpdateTime = 0;
+                deviceRecord devRec = deviceMap1.get(d.DeviceID);
+                if(devRec !=null)
+                {
+                    lastUpdateTime= devRec.getTime();
+                    d.LastUpdateTime = devRec.getTime();
+                    
+                    Boolean deviceActive = (System.currentTimeMillis() - lastUpdateTime) < AliveTimeOut;
+                    
+                    if(deviceActive)
+                    {
+                        if(!d.DeviceActive)
+                        {
+                            d.DeviceActive = true;
+                            d.SystemTimeAtActive = System.currentTimeMillis();
+                        }
+                    }
+                    else
+                    {
+                        d.DeviceActive = false;
+                        d.SystemTimeAtActive = 0;
+                    }
+                }
+                else
+                {
+                    d.DeviceActive = false;
+                }
+                updateMaintenanceView(Integer.valueOf(d.DeviceID), d.LastUpdateTime, d.SystemTimeAtActive);
+
+            }   
+        }
+        public void updateMaintenanceView(Integer deviceID, long lastUpdateTime, long systemStartTime)
+        {
+            long currTime           = System.currentTimeMillis();
+            long timeSinceLastMsg   = currTime - lastUpdateTime;
+            long devStartTime       = currTime - systemStartTime;
+            
+            String strDeviceID      = Integer.toString(deviceID);
+            String strDeviceStatus  = "Alive";
+            String strDeviceTimeSinceLastUpdate = "Unknown";
+            String strDeviceStartTime = "Unknown";
+            
+            if(lastUpdateTime >0)
+            {
+                strDeviceTimeSinceLastUpdate = String.format("%02d:%02d:%02d", 
+                                                    TimeUnit.MILLISECONDS.toHours(timeSinceLastMsg),
+                                                    TimeUnit.MILLISECONDS.toMinutes(timeSinceLastMsg) - 
+                                                    TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(timeSinceLastMsg)),
+                                                    TimeUnit.MILLISECONDS.toSeconds(timeSinceLastMsg) - 
+                                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeSinceLastMsg)));
+                
+                strDeviceStartTime = String.format("%02d:%02d:%02d", 
+                                                    TimeUnit.MILLISECONDS.toHours(devStartTime),
+                                                    TimeUnit.MILLISECONDS.toMinutes(devStartTime) - 
+                                                    TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(devStartTime)),
+                                                    TimeUnit.MILLISECONDS.toSeconds(devStartTime) - 
+                                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(devStartTime)));   
+            }
+
+            if (timeSinceLastMsg > AliveTimeOut)
+            {
+                strDeviceStatus = "Lost Communications";
+                strDeviceStartTime = "Unknown";
+            }
+            if(maintView !=null)
+            {
+                if(lastUpdateTime > 0)
+                {
+                    maintView.UpdateDeviceStatus(strDeviceID, strDeviceStatus,  strDeviceStartTime, strDeviceTimeSinceLastUpdate);
+                    
+                }
+            }
+            maintView.setVisible(true);   
         }
 
 	/***************************************************************************

@@ -70,7 +70,7 @@ class HumiditySensor extends DeviceHealthCheck
                 HumiditySensor hs = new HumiditySensor();
 		em = hs.getMessageManager();
                 /* Setup and start the device to start health check*/
-                hs.setup(deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+                hs.setup(em, deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
                 hs.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
@@ -184,6 +184,7 @@ class HumiditySensor extends DeviceHealthCheck
 					if ( Msg.GetMessageId() == 99 )
 					{
 						Done = true;
+                                                hs.stop();
 						try
 						{
 							em.UnRegister();

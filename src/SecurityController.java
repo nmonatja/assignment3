@@ -26,8 +26,11 @@ import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class SecurityController
+class SecurityController extends DeviceHealthCheck
 {
+        static String deviceID = "8";
+        static String msgMgrIP = "";
+        
 	public static void main(String args[])
 	{
 		String MsgMgrIP;					// Message Manager IP address
@@ -47,46 +50,20 @@ class SecurityController
  		if ( args.length == 0 )
  		{
 			// message manager is on the local system
-
 			System.out.println("\n\nAttempting to register on the local machine..." );
 
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is on the local machine
-
-				em = new MessageManagerInterface();
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
 		} else {
-
 			// message manager is not on the local system
-
-			MsgMgrIP = args[0];
-
-			System.out.println("\n\nAttempting to register on the machine:: " + MsgMgrIP );
-
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is NOT on the local machine
-
-				em = new MessageManagerInterface( MsgMgrIP );
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
+			msgMgrIP = args[0];
+			System.out.println("\n\nAttempting to register on the machine:: " + msgMgrIP );
 		} // if
+		
+                // have to instantiate this class in order to reference the non-static getMessageManager() method
+                SecurityController sc = new SecurityController();
+		em = sc.getMessageManager();
+                /* Setup and start the device to start health check*/
+                sc.setup(em, deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+                sc.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If ef is null then the
 		// message manager interface was not properly created.
@@ -210,6 +187,7 @@ class SecurityController
 					if ( Msg.GetMessageId() == 99 )
 					{
 						Done = true;
+                                                sc.stop();
 
 						try
 						{

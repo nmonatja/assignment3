@@ -3,8 +3,10 @@ import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class Sprinkler
+class Sprinkler extends DeviceHealthCheck
 {
+        static String deviceID = "5";
+        static String msgMgrIP = "";
 	public static void main(String args[])
 	{
 		String MsgMgrIP;					// Message Manager IP address
@@ -23,46 +25,20 @@ class Sprinkler
  		if ( args.length == 0 )
  		{
 			// message manager is on the local system
-
 			System.out.println("\n\nAttempting to register on the local machine..." );
 
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is on the local machine
-
-				em = new MessageManagerInterface();
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
 		} else {
-
 			// message manager is not on the local system
-
-			MsgMgrIP = args[0];
-
-			System.out.println("\n\nAttempting to register on the machine:: " + MsgMgrIP );
-
-			try
-			{
-				// Here we create an message manager interface object. This assumes
-				// that the message manager is NOT on the local machine
-
-				em = new MessageManagerInterface( MsgMgrIP );
-			}
-
-			catch (Exception e)
-			{
-				System.out.println("Error instantiating message manager interface: " + e);
-
-			} // catch
-
+			msgMgrIP = args[0];
+			System.out.println("\n\nAttempting to register on the machine:: " + msgMgrIP );
 		} // if
+		
+                // have to instantiate this class in order to reference the non-static getMessageManager() method
+                Sprinkler sd = new Sprinkler();
+		em = sd.getMessageManager();
+                /* Setup and start the device to start health check*/
+                sd.setup(em, deviceID, -1); //-1 uses default timer rate. The timer rate unit is ms
+                sd.start(); //Start the device health check
 
 		// Here we check to see if registration worked. If em is null then the
 		// message manager interface was not properly created.
@@ -165,6 +141,8 @@ class Sprinkler
 					if ( Msg.GetMessageId() == 99 )
 					{
 						Done = true;
+                                                
+                                                sd.stop();
 
 						try
 						{

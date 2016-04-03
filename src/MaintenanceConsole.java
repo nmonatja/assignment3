@@ -70,8 +70,10 @@ public class MaintenanceConsole
                     System.out.println("\n Not a valid option! Please try again!");
                 }*/
                 Monitor.listAliveDevices();
+                Monitor.updateAllDevices();
                 try {
-                        Thread.sleep(2000);                 //1000 milliseconds is one second.
+                        Thread.sleep(1000);                 //1000 milliseconds is one second.
+                       
                     } catch(InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
