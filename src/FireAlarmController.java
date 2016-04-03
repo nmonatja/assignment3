@@ -17,7 +17,7 @@ import InstrumentationPackage.*;
 import MessagePackage.*;
 import java.util.*;
 
-class FireAlarmController
+class FireAlarmController extends DeviceHealthCheck
 {
     static String deviceID = "6";
     static String msgMgrIP = "";
