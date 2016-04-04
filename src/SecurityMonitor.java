@@ -28,6 +28,7 @@ class SecurityMonitor extends Thread
 	Indicator si;								// Security indicator
         Indicator si2;								// Fire indicator
         boolean sprinklerUIDisplayed = false;
+        boolean isSprinklerOn = false;
         
 
             
@@ -204,6 +205,32 @@ class SecurityMonitor extends Thread
 						} // catch
 
 					} // if
+                                        
+                                        //sprinkler confirming that it's either ON or CANCEL (OFF)
+                                        if ( Msg.GetMessageId() == -12) 
+					{
+						try
+						{
+							if (Msg.GetMessage().equalsIgnoreCase("S1")) // sprinkler on
+                                                        {
+                                                            mw.WriteMessage("Received sprinkler on message" );
+                                                            isSprinklerOn = true;
+                                                        } 
+                                                        if (Msg.GetMessage().equalsIgnoreCase("S0")) // sprinkler cancel
+                                                        {
+                                                            mw.WriteMessage("Received sprinkler cancel message" );
+                                                            isSprinklerOn = false;
+                                                        } 
+						} // try
+
+						catch( Exception e )
+						{
+							mw.WriteMessage("Error reading security alert: " + e);
+
+						} // catch
+
+					} // if
+                                        
 
 					// If the message ID == 99 then this is a signal that the simulation
 					// is to end. At this point, the loop termination flag is set to
@@ -395,11 +422,27 @@ class SecurityMonitor extends Thread
         }
         
         public Boolean isSprinklerOn() {
-            return SprinklerController.SprinklerStatus(em);
+            return isSprinklerOn;
         }
         
         public void stopSprinkler() {
-            SprinklerController.SprinklerMessage(em, "S0");
+            // Here we create the message.
+
+		Message msg = new Message( (int) 11, "S0" );
+
+		// Here we send the message to the message manager.
+                try
+		{
+			em.SendMessage( msg );
+
+		} // try
+
+		catch (Exception e)
+		{
+			System.out.println("Error sending security control message:: " + e);
+
+		} // catch
+		
         }
         
         
