@@ -62,6 +62,7 @@ class MaintenanceMonitor extends Thread
         {
             int         DeviceID = 0;
             String      DeviceName = "Unknown";
+            String      DeviceDesc = "Unknown";
             Boolean     DeviceActive = false;
             long        SystemTimeAtActive = 0;
             long        LastUpdateTime = 0;
@@ -69,10 +70,11 @@ class MaintenanceMonitor extends Thread
             DeviceDesc()
             {
             }
-            DeviceDesc(int devID, String devName)
+            DeviceDesc(int devID, String devName, String devDesc)
             {
                 DeviceID = devID;
                 DeviceName = devName;
+                DeviceDesc = devDesc;
             }
         }
         ArrayList<DeviceDesc> DeviceList  = new ArrayList<DeviceDesc>();
@@ -275,22 +277,22 @@ class MaintenanceMonitor extends Thread
         }
         public void initMaintenanceView()
         {
-            DeviceList.add(new DeviceDesc(1, "Humidity Sensor"));
-            DeviceList.add(new DeviceDesc(2, "Temperature Sensor"));
-            DeviceList.add(new DeviceDesc(3, "Security Alert Sensor"));
-            DeviceList.add(new DeviceDesc(4, "Smoke Detector"));
-            DeviceList.add(new DeviceDesc(5, "Sprinkler"));
-            DeviceList.add(new DeviceDesc(6, "Fire Alarm Controller"));
-            DeviceList.add(new DeviceDesc(7, "Humidity Controller"));
-            DeviceList.add(new DeviceDesc(8, "Security Controller"));
-            DeviceList.add(new DeviceDesc(9, "Sprinkler Controller"));
-            DeviceList.add(new DeviceDesc(10, "Temperature Controller"));
+            DeviceList.add(new DeviceDesc(1, "Humidity Sensor", "Sensor to monoitor humidity"));
+            DeviceList.add(new DeviceDesc(2, "Temperature Sensor", "Sensor to monitor temperature"));
+            DeviceList.add(new DeviceDesc(3, "Security Alert Sensor", "Sensor to detect security breach"));
+            DeviceList.add(new DeviceDesc(4, "Smoke Detector", "Sensor to detect smoke"));
+            DeviceList.add(new DeviceDesc(5, "Sprinkler", "Device to actuate sprinkler"));
+            DeviceList.add(new DeviceDesc(6, "Fire Alarm Controller", "Device to detect and control fire"));
+            DeviceList.add(new DeviceDesc(7, "Humidity Controller", "Device to control humidity"));
+            DeviceList.add(new DeviceDesc(8, "Security Controller", "Device to detect security breach"));
+            DeviceList.add(new DeviceDesc(9, "Sprinkler Controller", "Device to control the sprinklers"));
+            DeviceList.add(new DeviceDesc(10, "Temperature Controller", "Device to control heater and chiller"));
 
             if(maintView !=null)
             {
                 for(DeviceDesc d : DeviceList)
                 {
-                    maintView.InsertNewDeviceEntry(Integer.toString(d.DeviceID),d.DeviceName, "Unknown",  "Unknown", "Unknown");
+                    maintView.InsertNewDeviceEntry(Integer.toString(d.DeviceID),d.DeviceName, d.DeviceDesc, "Unknown",  "Unknown", "Unknown");
                 
                 }
             }

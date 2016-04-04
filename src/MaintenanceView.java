@@ -40,20 +40,20 @@ public class MaintenanceView extends javax.swing.JFrame {
 
         jDeviceListTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "Device ID", "Device Name", "Device Status", "Device Active Time (hh:mm:ss)", "Time Since Last Comms (hh:mm:ss)"
+                "Device ID", "Device Name", "Device Description", "Device Status", "Device Active Time (hh:mm:ss)", "Time Since Last Comms (hh:mm:ss)"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -72,7 +72,7 @@ public class MaintenanceView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 871, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 991, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -129,10 +129,10 @@ public class MaintenanceView extends javax.swing.JFrame {
         tm.setRowCount(0);   
     }
     
-    public void InsertNewDeviceEntry(String deviceID, String deviceName, String deviceStatus, String deviceStartTime, String deviceTimeSinceLastUpdate)
+    public void InsertNewDeviceEntry(String deviceID, String deviceName, String deviceDesc, String deviceStatus, String deviceStartTime, String deviceTimeSinceLastUpdate)
     {
         DefaultTableModel tm=(DefaultTableModel) jDeviceListTable.getModel();
-        Object myrow[] = { deviceID,  deviceName,  deviceStatus,  deviceStartTime,  deviceTimeSinceLastUpdate};
+        Object myrow[] = { deviceID,  deviceName,  deviceDesc, deviceStatus,  deviceStartTime,  deviceTimeSinceLastUpdate};
         tm.addRow(myrow);
     }
     
@@ -152,21 +152,22 @@ public class MaintenanceView extends javax.swing.JFrame {
         }
         return retVal;
     }
-    public void UpdateDeviceEntry(String deviceID, String deviceName, String deviceStatus, String deviceStartTime, String deviceTimeSinceLastUpdate)
+    public void UpdateDeviceEntry(String deviceID, String deviceName, String deviceDesc, String deviceStatus, String deviceStartTime, String deviceTimeSinceLastUpdate)
     {
         DefaultTableModel tm=(DefaultTableModel) jDeviceListTable.getModel();
         int deviceRow = FindDeviceEntry(deviceID);
         
         if(deviceRow == -1)
         {
-            InsertNewDeviceEntry(deviceID, deviceName, deviceStatus, deviceStartTime, deviceTimeSinceLastUpdate);
+            InsertNewDeviceEntry(deviceID, deviceName, deviceDesc, deviceStatus, deviceStartTime, deviceTimeSinceLastUpdate);
         }
         else
         {
             tm.setValueAt(deviceName, deviceRow, 1);
-            tm.setValueAt(deviceStatus, deviceRow, 2);
-            tm.setValueAt(deviceStartTime, deviceRow, 3);
-            tm.setValueAt(deviceTimeSinceLastUpdate, deviceRow, 4);
+            tm.setValueAt(deviceDesc, deviceRow, 2);
+            tm.setValueAt(deviceStatus, deviceRow, 3);
+            tm.setValueAt(deviceStartTime, deviceRow, 4);
+            tm.setValueAt(deviceTimeSinceLastUpdate, deviceRow, 5);
         }
     }
     
@@ -177,9 +178,9 @@ public class MaintenanceView extends javax.swing.JFrame {
         
         if(deviceRow != -1)
         {
-            tm.setValueAt(deviceStatus, deviceRow, 2);
-            tm.setValueAt(deviceTimeSinceLastUpdate, deviceRow, 4);
-            tm.setValueAt(deviceStartTime, deviceRow, 3);
+            tm.setValueAt(deviceStatus, deviceRow, 3);
+            tm.setValueAt(deviceTimeSinceLastUpdate, deviceRow, 5);
+            tm.setValueAt(deviceStartTime, deviceRow, 4);
         }
         jDeviceListTable.invalidate();
         tm.fireTableDataChanged(); 
